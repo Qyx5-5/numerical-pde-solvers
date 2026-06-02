@@ -51,7 +51,8 @@ python examples/canonical_cases.py poisson
 python examples/canonical_cases.py advection_diffusion
 ```
 
-The canonical cases save plots under `outputs/`, which is ignored by Git.
+The canonical cases save publication-style PNG/PDF figures under `outputs/`, which is ignored by Git.
+Use `--formats png pdf svg` to choose output formats.
 
 ## Tests
 

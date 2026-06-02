@@ -20,6 +20,44 @@ from numerical_pde import (
     upwind_first,
 )
 
+FIGSIZE = (9.0, 3.8)
+COLORS = {
+    "primary": "#1f77b4",
+    "secondary": "#d62728",
+    "accent": "#2ca02c",
+    "muted": "#6b7280",
+}
+
+
+def set_publication_style() -> None:
+    plt.rcParams.update(
+        {
+            "figure.dpi": 160,
+            "savefig.dpi": 300,
+            "font.size": 10,
+            "axes.labelsize": 11,
+            "axes.titlesize": 12,
+            "legend.fontsize": 9,
+            "lines.linewidth": 2.0,
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.grid": True,
+            "grid.alpha": 0.22,
+            "grid.linewidth": 0.7,
+        }
+    )
+
+
+def save_figure(fig: plt.Figure, output: Path, formats: tuple[str, ...]) -> list[Path]:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    written = []
+    for fmt in formats:
+        path = output.with_suffix(f".{fmt}")
+        fig.savefig(path, bbox_inches="tight", transparent=False)
+        written.append(path)
+    plt.close(fig)
+    return written
+
 
 def solve_heat(points: int = 128, diffusivity: float = 0.05, final_time: float = 0.25):
     grid = Grid1D(0.0, 2.0 * np.pi, points)
@@ -67,59 +105,77 @@ def solve_poisson(points: int = 128):
     return grid, u, exact
 
 
-def plot_time_series(x: np.ndarray, initial: np.ndarray, final: np.ndarray, output: Path, title: str) -> Path:
-    output.parent.mkdir(parents=True, exist_ok=True)
-    plt.figure(figsize=(6, 3.5))
-    plt.plot(x, initial, label="initial")
-    plt.plot(x, final, label="final")
-    plt.xlabel("x")
-    plt.ylabel("u")
-    plt.title(title)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output, dpi=160)
-    plt.close()
-    return output
+def plot_heat(output: Path, points: int = 128, formats: tuple[str, ...] = ("png",)) -> list[Path]:
+    set_publication_style()
+    result, exact = solve_heat(points=points)
+    error = result.u[-1] - exact
+    fig, (ax, err_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    ax.plot(result.x, result.u[0], color=COLORS["muted"], label="initial")
+    ax.plot(result.x, result.u[-1], color=COLORS["primary"], label="numerical")
+    ax.plot(result.x, exact, "--", color=COLORS["secondary"], label="exact")
+    ax.set_xlabel("x")
+    ax.set_ylabel("u(x,t)")
+    ax.legend(frameon=False)
+    err_ax.plot(result.x, error, color=COLORS["accent"])
+    err_ax.set_xlabel("x")
+    err_ax.set_ylabel("numerical - exact")
+    err_ax.set_title(f"L2 = {l2_error(result.u[-1], exact, result.x[1] - result.x[0]):.2e}")
+    fig.suptitle("Heat Equation", y=1.03)
+    return save_figure(fig, output, formats)
 
 
-def plot_poisson(output: Path, points: int = 128) -> Path:
+def plot_advection_diffusion(output: Path, points: int = 128, formats: tuple[str, ...] = ("png",)) -> list[Path]:
+    set_publication_style()
+    result = solve_advection_diffusion(points=points)
+    dx = result.x[1] - result.x[0]
+    masses = mass(result.u, dx)
+    fig, (ax, mass_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    ax.plot(result.x, result.u[0], color=COLORS["muted"], label="initial")
+    ax.plot(result.x, result.u[-1], color=COLORS["primary"], label="final")
+    ax.set_xlabel("x")
+    ax.set_ylabel("u(x,t)")
+    ax.legend(frameon=False)
+    mass_ax.plot(result.t, masses, color=COLORS["accent"])
+    mass_ax.set_xlabel("t")
+    mass_ax.set_ylabel("mass")
+    mass_ax.set_title(f"drift = {abs(masses[-1] - masses[0]):.2e}")
+    fig.suptitle("Advection-Diffusion Equation", y=1.03)
+    return save_figure(fig, output, formats)
+
+
+def plot_poisson(output: Path, points: int = 128, formats: tuple[str, ...] = ("png",)) -> list[Path]:
+    set_publication_style()
     grid, numerical, exact = solve_poisson(points)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    plt.figure(figsize=(6, 3.5))
-    plt.plot(grid.x, numerical, label="numerical")
-    plt.plot(grid.x, exact, "--", label="exact")
-    plt.xlabel("x")
-    plt.ylabel("u")
-    plt.title("Poisson Equation")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output, dpi=160)
-    plt.close()
-    return output
+    fig, (ax, err_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    ax.plot(grid.x, numerical, color=COLORS["primary"], label="numerical")
+    ax.plot(grid.x, exact, "--", color=COLORS["secondary"], label="exact")
+    ax.set_xlabel("x")
+    ax.set_ylabel("u(x)")
+    ax.legend(frameon=False)
+    err_ax.plot(grid.x, numerical - exact, color=COLORS["accent"])
+    err_ax.set_xlabel("x")
+    err_ax.set_ylabel("numerical - exact")
+    err_ax.set_title(f"L2 = {l2_error(numerical, exact, grid.dx):.2e}")
+    fig.suptitle("Poisson Equation", y=1.03)
+    return save_figure(fig, output, formats)
 
 
-def run_case(name: str, output_dir: Path = Path("outputs")) -> Path:
+def run_case(name: str, output_dir: Path = Path("outputs"), formats: tuple[str, ...] = ("png",)) -> list[Path]:
     if name == "heat":
         result, exact = solve_heat()
-        path = plot_time_series(result.x, result.u[0], result.u[-1], output_dir / "heat.png", "Heat Equation")
+        paths = plot_heat(output_dir / "heat", formats=formats)
         print(f"L2 error: {l2_error(result.u[-1], exact, result.x[1] - result.x[0]):.3e}")
-        return path
+        return paths
     if name == "advection_diffusion":
         result = solve_advection_diffusion()
-        path = plot_time_series(
-            result.x,
-            result.u[0],
-            result.u[-1],
-            output_dir / "advection_diffusion.png",
-            "Advection-Diffusion Equation",
-        )
+        paths = plot_advection_diffusion(output_dir / "advection_diffusion", formats=formats)
         print(f"mass drift: {abs(mass(result.u[-1], result.x[1] - result.x[0]) - mass(result.u[0], result.x[1] - result.x[0])):.3e}")
-        return path
+        return paths
     if name == "poisson":
         grid, numerical, exact = solve_poisson()
-        path = plot_poisson(output_dir / "poisson.png")
+        paths = plot_poisson(output_dir / "poisson", formats=formats)
         print(f"L2 error: {l2_error(numerical, exact, grid.dx):.3e}")
-        return path
+        return paths
     raise ValueError(f"unknown case '{name}'")
 
 
@@ -127,9 +183,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("case", choices=["heat", "poisson", "advection_diffusion"])
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    parser.add_argument("--formats", nargs="+", default=["png", "pdf"], choices=["png", "pdf", "svg"])
     args = parser.parse_args()
-    path = run_case(args.case, args.output_dir)
-    print(f"saved {path}")
+    paths = run_case(args.case, args.output_dir, formats=tuple(args.formats))
+    print("saved " + ", ".join(str(path) for path in paths))
 
 
 if __name__ == "__main__":

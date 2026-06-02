@@ -29,14 +29,15 @@ def test_advection_diffusion_case_stays_finite_and_mass_bounded():
 
 
 def test_poisson_plot_writes_png(tmp_path: Path):
-    output = plot_poisson(tmp_path / "poisson.png", points=64)
+    outputs = plot_poisson(tmp_path / "poisson", points=64, formats=("png", "pdf"))
 
-    assert output.exists()
-    assert output.stat().st_size > 0
+    assert {path.suffix for path in outputs} == {".png", ".pdf"}
+    assert all(path.exists() and path.stat().st_size > 0 for path in outputs)
 
 
 def test_run_case_writes_each_png(tmp_path: Path):
     for name in ["heat", "poisson", "advection_diffusion"]:
-        output = run_case(name, tmp_path)
-        assert output.exists()
-        assert output.suffix == ".png"
+        outputs = run_case(name, tmp_path, formats=("png",))
+        assert len(outputs) == 1
+        assert outputs[0].exists()
+        assert outputs[0].suffix == ".png"
