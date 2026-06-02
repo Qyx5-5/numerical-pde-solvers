@@ -59,6 +59,25 @@ def save_figure(fig: plt.Figure, output: Path, formats: tuple[str, ...]) -> list
     return written
 
 
+def caption(ax: plt.Axes, text: str) -> None:
+    ax.figure.text(
+        0.08,
+        0.045,
+        text,
+        ha="left",
+        va="bottom",
+        fontsize=8.5,
+        color="#374151",
+        wrap=True,
+    )
+
+
+def two_panel_figure() -> tuple[plt.Figure, tuple[plt.Axes, plt.Axes]]:
+    fig, axes = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=False)
+    fig.subplots_adjust(left=0.08, right=0.95, top=0.82, bottom=0.24, wspace=0.35)
+    return fig, axes
+
+
 def solve_heat(points: int = 128, diffusivity: float = 0.05, final_time: float = 0.25):
     grid = Grid1D(0.0, 2.0 * np.pi, points)
     u0 = np.sin(grid.x)
@@ -109,18 +128,19 @@ def plot_heat(output: Path, points: int = 128, formats: tuple[str, ...] = ("png"
     set_publication_style()
     result, exact = solve_heat(points=points)
     error = result.u[-1] - exact
-    fig, (ax, err_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    fig, (ax, err_ax) = two_panel_figure()
     ax.plot(result.x, result.u[0], color=COLORS["muted"], label="initial")
     ax.plot(result.x, result.u[-1], color=COLORS["primary"], label="numerical")
     ax.plot(result.x, exact, "--", color=COLORS["secondary"], label="exact")
     ax.set_xlabel("x")
     ax.set_ylabel("u(x,t)")
     ax.legend(frameon=False)
+    caption(ax, "Heat equation: u_t = 0.05 u_xx on periodic [0, 2pi], initial state sin(x), exact decay exp(-nu t)sin(x).")
     err_ax.plot(result.x, error, color=COLORS["accent"])
     err_ax.set_xlabel("x")
     err_ax.set_ylabel("numerical - exact")
     err_ax.set_title(f"L2 = {l2_error(result.u[-1], exact, result.x[1] - result.x[0]):.2e}")
-    fig.suptitle("Heat Equation", y=1.03)
+    fig.suptitle("Heat Equation", y=0.95)
     return save_figure(fig, output, formats)
 
 
@@ -129,34 +149,36 @@ def plot_advection_diffusion(output: Path, points: int = 128, formats: tuple[str
     result = solve_advection_diffusion(points=points)
     dx = result.x[1] - result.x[0]
     masses = mass(result.u, dx)
-    fig, (ax, mass_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    fig, (ax, mass_ax) = two_panel_figure()
     ax.plot(result.x, result.u[0], color=COLORS["muted"], label="initial")
     ax.plot(result.x, result.u[-1], color=COLORS["primary"], label="final")
     ax.set_xlabel("x")
     ax.set_ylabel("u(x,t)")
     ax.legend(frameon=False)
+    caption(ax, "Advection-diffusion: u_t + u_x = 0.01 u_xx on periodic [0,1], localized Gaussian pulse; mass should remain constant.")
     mass_ax.plot(result.t, masses, color=COLORS["accent"])
     mass_ax.set_xlabel("t")
     mass_ax.set_ylabel("mass")
     mass_ax.set_title(f"drift = {abs(masses[-1] - masses[0]):.2e}")
-    fig.suptitle("Advection-Diffusion Equation", y=1.03)
+    fig.suptitle("Advection-Diffusion Equation", y=0.95)
     return save_figure(fig, output, formats)
 
 
 def plot_poisson(output: Path, points: int = 128, formats: tuple[str, ...] = ("png",)) -> list[Path]:
     set_publication_style()
     grid, numerical, exact = solve_poisson(points)
-    fig, (ax, err_ax) = plt.subplots(1, 2, figsize=FIGSIZE, constrained_layout=True)
+    fig, (ax, err_ax) = two_panel_figure()
     ax.plot(grid.x, numerical, color=COLORS["primary"], label="numerical")
     ax.plot(grid.x, exact, "--", color=COLORS["secondary"], label="exact")
     ax.set_xlabel("x")
     ax.set_ylabel("u(x)")
     ax.legend(frameon=False)
+    caption(ax, "Poisson equation: u_xx = -pi^2 sin(pi x), x in [0,1], u(0)=u(1)=0; exact solution is sin(pi x).")
     err_ax.plot(grid.x, numerical - exact, color=COLORS["accent"])
     err_ax.set_xlabel("x")
     err_ax.set_ylabel("numerical - exact")
     err_ax.set_title(f"L2 = {l2_error(numerical, exact, grid.dx):.2e}")
-    fig.suptitle("Poisson Equation", y=1.03)
+    fig.suptitle("Poisson Equation", y=0.95)
     return save_figure(fig, output, formats)
 
 

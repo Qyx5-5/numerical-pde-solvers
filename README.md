@@ -54,6 +54,12 @@ python examples/canonical_cases.py advection_diffusion
 The canonical cases save publication-style PNG/PDF figures under `outputs/`, which is ignored by Git.
 Use `--formats png pdf svg` to choose output formats.
 
+Canonical figures are designed as field-entry case studies:
+
+- Heat: finite-difference diffusion with exact sine-mode decay and error panel.
+- Poisson: boundary-value solve with exact solution and pointwise error.
+- Advection-diffusion: transport plus smoothing with mass-conservation diagnostics.
+
 ## Tests
 
 ```bash
