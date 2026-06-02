@@ -7,9 +7,6 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-*.asv
-*.mat
-*.fig
 *.pt
 *.pth
 *.png

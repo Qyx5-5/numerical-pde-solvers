@@ -1,13 +1,12 @@
 # Numerical PDE Solvers
 
-A compact collection of reusable numerical methods for PDE experiments in Python and MATLAB.
+A compact Python collection of reusable numerical methods for PDE experiments.
 
 ## Features
 
 - Generic 1D grid, boundary, operator, time-stepping, and analysis utilities
 - Finite-difference, WENO-style, and spectral derivative operators
 - Burgers equation examples kept outside the core package
-- MATLAB split-step spectral routines with a small Gross-Pitaevskii example
 
 ## Install
 
@@ -36,11 +35,9 @@ result = solver.solve(u0, final_time=0.5)
 ## Layout
 
 ```text
-python/src/numerical_pde/   reusable Python methods
+python/src/numerical_pde/   reusable methods
 python/examples/            concrete PDE cases
-matlab/tssp/                generic split-step spectral routines
-matlab/examples/gpe/        compact Gross-Pitaevskii example
-tests/                      Python smoke and correctness tests
+tests/                      smoke and correctness tests
 ```
 
 ## Examples
@@ -49,13 +46,6 @@ tests/                      Python smoke and correctness tests
 cd python
 python examples/burgers_fdm.py
 python examples/burgers_weno.py
-```
-
-For MATLAB:
-
-```matlab
-cd matlab/examples/gpe
-run_gpe_example
 ```
 
 ## Tests
@@ -67,4 +57,4 @@ pytest
 
 ## Adding A PDE
 
-Put reusable discretization mechanics in `python/src/numerical_pde` or `matlab/tssp`. Keep equation setup, parameters, initial conditions, and plotting in examples.
+Put reusable discretization mechanics in `python/src/numerical_pde`. Keep equation setup, parameters, initial conditions, and plotting in examples.
