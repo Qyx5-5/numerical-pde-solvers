@@ -51,7 +51,6 @@ python examples/burgers_weno.py
 ## Tests
 
 ```bash
-$env:PYTHONPATH = "python/src;python"
 pytest
 ```
 
