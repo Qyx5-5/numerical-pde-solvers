@@ -40,7 +40,29 @@ python/examples/            concrete PDE cases
 tests/                      smoke and correctness tests
 ```
 
-## Examples
+## Canonical Figures
+
+These cases show what each numerical method should preserve or approximate.
+
+### Heat: diffusion with exact decay
+
+![Heat equation case](docs/figures/heat.png)
+
+The numerical solution is compared with the analytic sine-mode decay. The error panel should remain small and structured.
+
+### Poisson: boundary-value problem
+
+![Poisson equation case](docs/figures/poisson.png)
+
+The solver recovers the exact solution under Dirichlet boundary conditions. The right panel shows pointwise numerical error.
+
+### Advection-Diffusion: transport plus smoothing
+
+![Advection-diffusion case](docs/figures/advection_diffusion.png)
+
+The pulse moves and broadens. The mass panel checks whether the discretization preserves the total amount of the transported quantity.
+
+## Run Examples
 
 ```bash
 cd python
@@ -51,14 +73,7 @@ python examples/canonical_cases.py poisson
 python examples/canonical_cases.py advection_diffusion
 ```
 
-The canonical cases save publication-style PNG/PDF figures under `outputs/`, which is ignored by Git.
-Use `--formats png pdf svg` to choose output formats.
-
-Canonical figures are designed as field-entry case studies:
-
-- Heat: finite-difference diffusion with exact sine-mode decay and error panel.
-- Poisson: boundary-value solve with exact solution and pointwise error.
-- Advection-diffusion: transport plus smoothing with mass-conservation diagnostics.
+Generated figures are saved under `outputs/`, which is ignored by Git. Use `--formats png pdf svg` to choose formats.
 
 ## Tests
 
