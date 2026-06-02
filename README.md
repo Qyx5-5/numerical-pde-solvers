@@ -46,7 +46,12 @@ tests/                      smoke and correctness tests
 cd python
 python examples/burgers_fdm.py
 python examples/burgers_weno.py
+python examples/canonical_cases.py heat
+python examples/canonical_cases.py poisson
+python examples/canonical_cases.py advection_diffusion
 ```
+
+The canonical cases save plots under `outputs/`, which is ignored by Git.
 
 ## Tests
 
