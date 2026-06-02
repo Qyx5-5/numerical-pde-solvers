@@ -48,19 +48,19 @@ These cases show what each numerical method should preserve or approximate.
 
 ![Heat equation case](docs/figures/heat.png)
 
-The numerical solution is compared with the analytic sine-mode decay. The error panel should remain small and structured.
+The case solves $u_t=\nu u_{xx}$ with $\nu=0.05$ on periodic $x\in[0,2\pi]$ and $u(x,0)=\sin x$. The exact solution is $u(x,t)=e^{-\nu t}\sin x$.
 
 ### Poisson: boundary-value problem
 
 ![Poisson equation case](docs/figures/poisson.png)
 
-The solver recovers the exact solution under Dirichlet boundary conditions. The right panel shows pointwise numerical error.
+The case solves $u_{xx}=-\pi^2\sin(\pi x)$ on $x\in[0,1]$ with $u(0)=u(1)=0$. The exact solution is $u(x)=\sin(\pi x)$, and the right panel shows numerical error.
 
 ### Advection-Diffusion: transport plus smoothing
 
 ![Advection-diffusion case](docs/figures/advection_diffusion.png)
 
-The pulse moves and broadens. The mass panel checks whether the discretization preserves the total amount of the transported quantity.
+The case solves $u_t+u_x=\nu u_{xx}$ with $\nu=0.01$ on periodic $x\in[0,1]$. The pulse moves and broadens; the mass panel checks conservation of $\int u(x,t)\,dx$.
 
 ## Run Examples
 
